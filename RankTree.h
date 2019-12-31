@@ -86,15 +86,7 @@ public:
     int getRank(AVLNode*);
     int getRank(K);
     
-    int getRank(AVLNode* node)
-    {
-        return node->rank;
-    }
-    int getRank(K key)
-    {
-        AVLNode* node = findAVLNode(k);
-        return getRank(node);
-    }
+   
 
 
     bool isBalanced() const {
@@ -115,8 +107,18 @@ public:
     //rotating left
     void rotateRR(AVLNode* node) {
         //update ranks of temp(parent) and node (right son):
-        node->rank = 1 + node->leftSon->rank + node->rightSon->leftSon->rank;
-        node->rightSon->rank = 1 + node->rightSon->rightSon->rank + node->rank;
+        int n, nl, nrl, nr, nrr; 
+        if(!node->rightSon->leftSon) nrl = 0;
+        else nrl = node->rightSon->leftSon->rank;
+        if(!node->rightSon->rightSon) nrr = 0;
+        else nrr = node->rightSon->rightSon->rank;
+        if(!node->leftSon) nl = 0;
+        else nl = node->leftSon->rank;
+        
+        n = 1 + nl + nrl;
+        nr = 1 + nrr + n;
+        node->rank = n;//1 + node->leftSon->rank + node->rightSon->leftSon->rank;
+        node->rightSon->rank =nr; //1 + node->rightSon->rightSon->rank + node->rank;
 
         AVLNode* temp = node->rightSon;
         node->rightSon = temp->leftSon;
@@ -131,8 +133,19 @@ public:
     //rotating right
     void rotateLL(AVLNode* node) {
         //update ranks of temp(parent) and node (right son):
-        node->rank = 1 + node->rightSon->rank + node->leftSon->rightSon->rank;
-        node->leftSon->rank = 1 + node->leftSon->leftSon->rank + node->rank;
+        int n, nl, nlr, nr, nll; 
+        if(!node->leftSon->rightSon) nlr = 0;
+        else nlr = node->leftSon->rightSon->rank;
+        if(!node->leftSon->leftSon) nll = 0;
+        else nll = node->leftSon->leftSon->rank;
+        if(!node->rightSon) nr = 0;
+        else nr = node->rightSon->rank;
+        
+        n = 1 + nl + nlr;
+        nl = 1 + nll + n;
+        
+        node->rank = n;//1 + node->rightSon->rank + node->leftSon->rightSon->rank;
+        node->leftSon->rank = nl;//1 + node->leftSon->leftSon->rank + node->rank;
 
         AVLNode* temp = node->leftSon;
         node->leftSon = temp->rightSon;
@@ -148,12 +161,14 @@ public:
     void rotateLR(AVLNode* node) {
         rotateRR(node->leftSon);
         rotateLL(node);
+      
     }
 
     //rotate right then left
     void rotateRL(AVLNode* node) {
         rotateLL(node->rightSon);
         rotateRR(node);
+        
     }
 
     //getters
@@ -262,27 +277,41 @@ public:
         }
         return NULL;
     }
-    void reduceRankPath(K key)
-    {
-        AVLNode* current = root;
-        while (current) {
-            current->rank -= 1;
-            if (current->key == key) return;
-            if (current->key > key) {
-                current = current->leftSon;
-            } else {
-                current = current->rightSon;
-            }
+  
+};
+template<class K, class D>
+int RankTree<K, D>::getRank(AVLNode* node)
+{
+    return node->rank;
+}
+
+template<class K, class D>
+int RankTree<K, D>::getRank(K key)
+{
+    AVLNode* node = findAVLNode(key);
+    return getRank(node);
+}
+
+template<class K, class D>
+void RankTree<K, D>::reduceRankPath(K key)
+{
+    AVLNode* current = root;
+    while (current) {
+        current->rank -= 1;
+        if (current->key == key) return;
+        if (current->key > key) {
+            current = current->leftSon;
+        } else {
+            current = current->rightSon;
         }
     }
-};
-
-
+}
 
 template<class K, class D>
 void RankTree<K, D>::insert(K key, D data) {
     if (root == NULL) {
         root = new AVLNode(key, data);
+    
         size++;
     } else {
         insert(key, data, root);
