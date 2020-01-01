@@ -85,8 +85,12 @@ public:
     
     int getRank(AVLNode*);
     int getRank(K);
-    
-   
+
+    AVLNode* getRoot()
+    {
+        return this->root;
+    }
+//    static RankTree<K, D>* merge(RankTree<K,D>, RankTree<K,D>, int, int);
 
 
     bool isBalanced() const {
@@ -449,6 +453,33 @@ bool RankTree<K, D>::isEmpty()
 {
     return this->root == NULL;
 }
+
+// template<class K, class D>
+// AVLNode* createShell(int n,K key, D data, AVLNode* parent)
+// {
+//     if(n <= 0) return NULL;
+//     AVLNode* node = AVLNode* node = new AVLNode(key,data, parent);
+//     node->leftSon = createShell(n - 1,key,data,node);
+//     node->rightSon = createShell(n - 2,key,data,node);
+// }
+
+// template<class K, class D>
+// AVLNode* createShell(int n,K key, D data)
+// {
+//     if(n <= 0) return NULL;
+//     AVLNode* node = new AVLNode(key,data);
+//     node->leftSon = createShell(n - 1,key,data,node);
+//     node->rightSon = createShell(n - 2,key,data,node);
+//     return node;
+// }
+
+// template<class K, class D>
+// RankTree<K, D>* RankTree<K,D>::merge(RankTree<K,D> t1, RankTree<K,D> t2, int m1, int m2)
+// {
+//     if(!m1 && (!m2)) NULL;
+//     AVLNode* shell = createShell(m1+m2, t.root->key,t.root->data);
+
+// }
 
 
 #endif //RankTree_RankTree_H
