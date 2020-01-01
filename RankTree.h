@@ -7,7 +7,7 @@
 
 #include <cmath>
 
-template<class K, class D>
+template <class K, class D>
 class RankTree {
     class AVLNode {
         int rank;
@@ -58,7 +58,7 @@ class RankTree {
 
     AVLNode* root; //Any tree is a Node as a root
     int size; //how many nodes
-
+    
     void insert(K key, D data, AVLNode* parent);
     void deleteNode(AVLNode* toDelete);
     void reduceRankPath(K key);
@@ -68,7 +68,7 @@ class RankTree {
 public:
     RankTree() : root(NULL), size(0) {}
 	
-	AVLNode* createShell(int m, AVLNode* parent = NULL)
+	/*AVLNode* createShell(int m, AVLNode* parent = NULL)
 	{
 		if(!m) return NULL;
 		AVLNode* node = new AVLNode(0,0,parent);
@@ -94,7 +94,7 @@ public:
 		pour(arr, node, m, &i);
 		root = node;
 		//check if anything needs to be added
-	}
+	}*/
     ~RankTree() {
         if (root != NULL) {
             delete root;
@@ -173,7 +173,7 @@ public:
         if(!node->rightSon) nr = 0;
         else nr = node->rightSon->rank;
         
-        n = 1 + nl + nlr;
+        n = 1 + nr + nlr;
         nl = 1 + nll + n;
         
         node->rank = n;//1 + node->rightSon->rank + node->leftSon->rightSon->rank;
@@ -321,6 +321,7 @@ template<class K, class D>
 int RankTree<K, D>::getRank(K key)
 {
     AVLNode* node = findAVLNode(key);
+    if (!node) return -1;
     return getRank(node);
 }
 
