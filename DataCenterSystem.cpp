@@ -27,7 +27,11 @@ StatusType DataCenterSystem::Init(int n) {
     }
     try {
         this->dataCentersArray =  new DataCenter*[n];
-        this->allServersTraffic = new RankTree<int, RankTree<int, int> *>();
+        for (int i = 1; i <= n ; i++) {
+            DataCenter *dc = new DataCenter(i);
+            dataCentersArray[i-1] = dc;
+        }
+        this->allServersTraffic = NULL;
         this->dataCenterUnionFindByID = new UnionFind(n);
         this->serversHashMap = new HashMap<Server*>();
         this->elementsNum = n;
@@ -69,7 +73,10 @@ StatusType DataCenterSystem::AddServer(int dataCenterID, int serverID) {
         return FAILURE;
     }
     try {
-
+        int currDCGroup = this->dataCenterUnionFindByID->find(dataCenterID);
+        Server *newServer = new Server(serverID,currDCGroup);
+        this->serversHashMap->insert(serverID,newServer);
+        this->dataCentersArray[currDCGroup-1]->serversCounter++;
     }
     catch (std::bad_alloc &ba) {
         return ALLOCATION_ERROR;
@@ -84,6 +91,31 @@ StatusType DataCenterSystem::RemoveServer(int serverID) {
         return FAILURE;
     }
     try {
+        Server* serverToRemove = *(this->serversHashMap->find(serverID));
+        int DCWithServerToRemoveID = this->dataCenterUnionFindByID->find(serverToRemove->DCFatherID);
+        DataCenter* DCsServerToRemove = this->dataCentersArray[DCWithServerToRemoveID-1];
+        int trafficToRemove = serverToRemove->traffic;
+        this->serversHashMap->deleteNode(serverID);
+
+        if (trafficToRemove != -1) {
+            if(this->allServersTraffic->findAVLNode(trafficToRemove)){
+                RankTree<int,int>* iDsTree = this->allServersTraffic->findAVLNode(trafficToRemove)->getData();
+                iDsTree->deleteKey(serverID);
+                if (iDsTree->getSize() == 0) {
+                    this->allServersTraffic->deleteKey(trafficToRemove);
+                }
+            }
+            if(DCsServerToRemove->DCsServersTraffic) {
+                if(DCsServerToRemove->DCsServersTraffic->findAVLNode(trafficToRemove)) {
+                    RankTree<int,int>* iDsTree = DCsServerToRemove->DCsServersTraffic->findAVLNode(trafficToRemove)->getData();
+                    iDsTree->deleteKey(serverID);
+                    if (iDsTree->getSize() == 0) {
+                        this->allServersTraffic->deleteKey(trafficToRemove);
+                    }
+                }
+                DCsServerToRemove->serversCounter--;
+            }
+        }
     }
     catch (std::bad_alloc &ba) {
         return ALLOCATION_ERROR;
@@ -96,6 +128,7 @@ StatusType DataCenterSystem::SetTraffic(int serverID, int traffic) {
     if (!(isServerExist(serverID)))
         return FAILURE;
     try {
+        
     }
     catch (std::bad_alloc &ba) {
         return ALLOCATION_ERROR;
