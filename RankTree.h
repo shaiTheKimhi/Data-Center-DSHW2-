@@ -49,7 +49,81 @@ class RankTree {
         }
 
         friend class RankTree;
-
+        class Container
+        {
+            K first;
+            D second;
+            Container(K key, D data) { first = key; second = data; }
+        };
+        void pourToArray(AVLNode** arr, int m, int* index)
+        {
+            if ((*index) >= m) return;
+            if(this->leftSon)
+                this->leftSon->pourToArray(arr, m, index);
+            arr[(*index)] = this;
+            (*index) += 1;
+            if(this->rightSon)
+                this->rightSon->pourToArray(arr, m, index);
+        }
+        AVLNode** nodeToArray(int m)
+        {
+            int i = 0;
+            AVLNode** arr = new AVLNode*[m];
+            this->pourToArray(arr, m, &i);
+            return arr;
+        }
+        static AVLNode** mergeArray(AVLNode** arr1, AVLNode** arr2, int m1, int m2)
+        {
+            AVLNode** arr = new AVLNode*[m1 + m2];
+            int i1 = 0, i2 = 0, i = 0;
+            while (i1 < m1 && i2 < m2)
+            {
+                if (arr1[i1]->key < arr2[i2]->key) arr[i++] = arr1[i1++];
+                else arr[i++] = arr2[i2++];
+            }
+            for (i1; i1 < m1; i1++) arr[i++] = arr1[i1];
+            for (i2; i2 < m2; i2++) arr[i++] = arr2[i2];
+            return arr;
+        }
+        static AVLNode* createShell(int m, K key, D data)
+        {
+            if (m <= 0) return NULL;
+            AVLNode* node = new AVLNode(key, data);
+            node->rank = m;
+            m -= 1;
+            if (m % 2 != 0) node->leftSon = createShell(m / 2 + 1, key, data);
+            else node->leftSon = createShell(m / 2, key, data);
+            node->rightSon = createShell(m / 2, key, data);
+            return node;
+        }
+        void pourNode(AVLNode** arr, int m, int* i)
+        {
+            if ((*i) >= m) return;
+            if(this->leftSon)
+                this->leftSon->pourNode(arr, m, i);
+            this->key = arr[(*i)]->key;
+            this->data = arr[(*i)]->data;
+            //this->rank = m;
+            (*i) += 1;
+            if(this->rightSon)
+                this->rightSon->pourNode(arr, m, i);
+        }
+        AVLNode* mergeNodes(AVLNode* other, int m1, int m2)
+        {
+            int i = 0;
+            if (!m1 && !m2) return NULL;
+            else if (!m2) return this;
+            else if (!m1) return other;
+            AVLNode** arr1 = this->nodeToArray(m1);
+            AVLNode** arr2 = other->nodeToArray(m2);
+            AVLNode** arr = mergeArray(arr1, arr2, m1, m2);
+            AVLNode* node = createShell(m1+m2, this->key, other->data);
+            node->pourNode(arr, m1 + m2, &i);
+            delete arr1;
+            delete arr2;
+            delete arr;
+            return node;
+        }
     public:
         D getData(){
             return data;
@@ -64,10 +138,17 @@ class RankTree {
     void reduceRankPath(K key);
     void changeNode(AVLNode* parent, AVLNode* oldNode, AVLNode* newNode);
     void reBalance(AVLNode* node, bool isDelete = false);
+    //void pourToArray(AVLNode* node, int** arr, int m);
+    
+    //Container** treeToArray(int m);
+    
+    
+    
+
 
 public:
     RankTree() : root(NULL), size(0) {}
-	
+    RankTree(AVLNode* node, int m) :root(node), size(m) {}
 	/*AVLNode* createShell(int m, AVLNode* parent = NULL)
 	{
 		if(!m) return NULL;
@@ -113,6 +194,7 @@ public:
     
     int getRank(AVLNode*);
     int getRank(K);
+    RankTree* merge(RankTree* other, int m1, int m2);
 
     AVLNode* getRoot()
     {
@@ -511,6 +593,36 @@ bool RankTree<K, D>::isEmpty()
 //     AVLNode* shell = createShell(m1+m2, t.root->key,t.root->data);
 
 // }
+
+
+
+
+
+
+// void pourToArray(RankTree<int,int>::AVLNode* node, int** arr, int m)
+// {
+    	
+// }
+
+template<class K, class D>
+RankTree<K, D>* RankTree<K,D>::merge(RankTree<K,D>* other, int m1, int m2)
+{
+    AVLNode* n1 = this->root;
+    AVLNode* n2 = other->root;
+    AVLNode* node = n1->mergeNodes(n2, m1, m2);
+    return new RankTree<K, D>(node, m1 + m2);
+    /*int** arr = mergeArray(treeToArray(t1, m1), treeToArray(t2, m2), m1, m2);*/
+}
+
+
+
+
+
+
+
+
+
+
 
 
 #endif //RankTree_RankTree_H
