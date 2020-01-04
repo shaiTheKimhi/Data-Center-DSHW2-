@@ -413,6 +413,33 @@ public:
         return NULL;
     }
 
+    int findNodeIndex(K key){
+        AVLNode* current = root;
+        int indexCounter = 0;
+        while (current) {
+            if (current->key == key) {
+                indexCounter++;
+                if (current->leftSon) {
+                    indexCounter += current->leftSon->rank;
+                }
+                return indexCounter;
+            }
+            if (current->key > key) {
+                current = current->leftSon;
+            }
+            if (current->key < key) {
+                indexCounter++;
+                if (current->leftSon) {
+                    indexCounter += current->leftSon->rank;
+                }
+                current = current->rightSon;
+            }
+        }
+        return indexCounter;
+    }
+
+
+
 };
 template<class K, class D>
 int RankTree<K, D>::getRank(AVLNode* node)
@@ -473,10 +500,11 @@ void RankTree<K, D>::destroyData(AVLNode* node) {
 template<class K, class D>
 void RankTree<K, D>::insert(K key, D data, AVLNode* parent) {
     if (key == parent->key) {
-        parent->data = data;
+        parent->data += data;
         return;
     }
     parent->rank += 1;
+    parent->data += data;
     if (parent->key > key) {
         if (parent->leftSon) insert(key, data, parent->leftSon);
         else {
