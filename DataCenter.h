@@ -69,7 +69,7 @@ class DataCenter {
 public:
     int dataCenterID;
     int serversCounter;
-    RankTree<ServerNodeKey*,int>* DCsServersTraffic;
+    RankTree<ServerNodeKey,int>* DCsServersTraffic;
     DataCenter(int dataCenterID);
     ~DataCenter();
 };
