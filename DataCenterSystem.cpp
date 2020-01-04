@@ -122,8 +122,8 @@ StatusType DataCenterSystem::RemoveServer(int serverID) {
     }
     try {
         Server* serverToRemove = *(this->serversHashMap->find(serverID));
-        int DCWithServerToRemoveID = this->dataCenterUnionFindByID->find(serverToRemove->DCFatherID);
-        DataCenter* DCsServerToRemove = this->dataCentersArray[DCWithServerToRemoveID-1];
+        int DCWithServerToRemoveID = this->dataCenterUnionFindByID->find((serverToRemove->DCFatherID)-1);
+        DataCenter* DCsServerToRemove = this->dataCentersArray[DCWithServerToRemoveID];
         int trafficToRemove = serverToRemove->traffic;
         this->serversHashMap->deleteNode(serverID);
 
@@ -150,23 +150,29 @@ StatusType DataCenterSystem::SetTraffic(int serverID, int traffic) {
             Server* addTrafficServer = *(this->serversHashMap->find(serverID));
             int oldTraffic = addTrafficServer->traffic;
             addTrafficServer->traffic = traffic;
-            int fatherDCID = this->dataCenterUnionFindByID->find(addTrafficServer->DCFatherID);
-            DataCenter *fatherDC = this->dataCentersArray[fatherDCID-1];
+            int fatherDCID = this->dataCenterUnionFindByID->find((addTrafficServer->DCFatherID)-1);
+            DataCenter *fatherDC = this->dataCentersArray[fatherDCID];
 
             //check if there was no traffic for this server before, if so add new node in right place to both trees
             //else remove old node and new one
-            if (traffic == -1) {
+            if (oldTraffic == -1) {
                 ServerNodeKey* newNode = new ServerNodeKey(serverID,traffic);
-
+                if (this->allServersTraffic == NULL) {
+                    this->allServersTraffic = new RankTree<ServerNodeKey,int>();
+                }
                 this->allServersTraffic->insert(*newNode,0);
-                int newData = this->allServersTraffic->findAVLNode(*newNode)->getLeftSonData();
-                newData += this->allServersTraffic->findAVLNode(*newNode)->getRightSonData();
+                int newData = this->allServersTraffic->findAVLNode(*newNode)->isLeftSonExist() ? this->allServersTraffic->findAVLNode(*newNode)->getLeftSonData() : 0;
+                newData += this->allServersTraffic->findAVLNode(*newNode)->isRightSonExist() ? this->allServersTraffic->findAVLNode(*newNode)->getRightSonData(): 0;
                 newData += traffic;
                 this->allServersTraffic->changeData(*newNode,newData);
 
+                if (fatherDC->DCsServersTraffic == NULL) {
+                    fatherDC->DCsServersTraffic = new RankTree<ServerNodeKey,int>();
+                }
+
                 fatherDC->DCsServersTraffic->insert(*newNode,0);
-                int newDataDC = fatherDC->DCsServersTraffic->findAVLNode(*newNode)->getLeftSonData();
-                newDataDC += fatherDC->DCsServersTraffic->findAVLNode(*newNode)->getRightSonData();
+                int newDataDC = fatherDC->DCsServersTraffic->findAVLNode(*newNode)->isLeftSonExist() ? fatherDC->DCsServersTraffic->findAVLNode(*newNode)->getLeftSonData(): 0;
+                newDataDC += fatherDC->DCsServersTraffic->findAVLNode(*newNode)->isRightSonExist() ? fatherDC->DCsServersTraffic->findAVLNode(*newNode)->getRightSonData(): 0;
                 newDataDC += traffic;
                 fatherDC->DCsServersTraffic->changeData(*newNode,newDataDC);
 

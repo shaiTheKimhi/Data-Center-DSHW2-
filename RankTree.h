@@ -138,6 +138,14 @@ class RankTree {
             return leftSon->data;
         }
 
+        bool isLeftSonExist() {
+            return (this->leftSon != NULL);
+        }
+
+        bool isRightSonExist() {
+            return (this->rightSon != NULL);
+        }
+
         D getRightSonData() {
             return rightSon->data;
         }
