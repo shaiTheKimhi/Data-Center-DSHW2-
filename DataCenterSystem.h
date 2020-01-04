@@ -9,7 +9,7 @@ class DataCenterSystem{
 public:
 
     DataCenter** dataCentersArray;
-    RankTree<int, RankTree<int,int>*>* allServersTraffic;
+    RankTree<ServerNodeKey*,int>* allServersTraffic;
     UnionFind* dataCenterUnionFindByID;
     HashMap<Server*>* serversHashMap;
     int elementsNum;

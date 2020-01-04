@@ -98,23 +98,15 @@ StatusType DataCenterSystem::RemoveServer(int serverID) {
         this->serversHashMap->deleteNode(serverID);
 
         if (trafficToRemove != -1) {
-            if(this->allServersTraffic->findAVLNode(trafficToRemove)){
-                RankTree<int,int>* iDsTree = this->allServersTraffic->findAVLNode(trafficToRemove)->getData();
-                iDsTree->deleteKey(serverID);
-                if (iDsTree->getSize() == 0) {
-                    this->allServersTraffic->deleteKey(trafficToRemove);
-                }
-            }
-            if(DCsServerToRemove->DCsServersTraffic) {
-                if(DCsServerToRemove->DCsServersTraffic->findAVLNode(trafficToRemove)) {
-                    RankTree<int,int>* iDsTree = DCsServerToRemove->DCsServersTraffic->findAVLNode(trafficToRemove)->getData();
-                    iDsTree->deleteKey(serverID);
-                    if (iDsTree->getSize() == 0) {
-                        this->allServersTraffic->deleteKey(trafficToRemove);
-                    }
-                }
-                DCsServerToRemove->serversCounter--;
-            }
+            ServerNodeKey *toRemove = new ServerNodeKey(serverID);
+            toRemove->traffic = trafficToRemove;
+            this->allServersTraffic->deleteKey(toRemove);
+
+            DCsServerToRemove->DCsServersTraffic->deleteKey(toRemove);
+            DCsServerToRemove->serversCounter--;
+            
+            //CHECK: should delete or happens automatically?
+            //delete toRemove;
         }
     }
     catch (std::bad_alloc &ba) {
@@ -128,7 +120,9 @@ StatusType DataCenterSystem::SetTraffic(int serverID, int traffic) {
     if (!(isServerExist(serverID)))
         return FAILURE;
     try {
-        
+
+//        ServerNodeKey *newServerKey = new ServerNodeKey(serverID);
+
     }
     catch (std::bad_alloc &ba) {
         return ALLOCATION_ERROR;

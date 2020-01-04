@@ -1,6 +1,5 @@
 #include <exception>
 #include <new>
-#include <cstdio>
 #include "library2.h"
 #include "DataCenterSystem.h"
 using std::exception;

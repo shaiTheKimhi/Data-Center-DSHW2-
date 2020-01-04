@@ -35,7 +35,7 @@ class HashMap {
 public:
 
     HashMap() {
-        mapSize = 16;
+        mapSize = 1024;
         elementsNum = 0;
         map = new HashNode<D> *[mapSize];
         for (int i = 0; i < mapSize; i++) {
