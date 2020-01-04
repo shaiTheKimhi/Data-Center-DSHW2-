@@ -5,13 +5,13 @@
 using std::exception;
 
 void *Init(int n) {
+    if (n<= 0) {
+        return NULL;
+    }
     try {
         DataCenterSystem *DS = new DataCenterSystem();
-        StatusType check = DS->Init(n);
-        if (check == SUCCESS) {
-            return (void*)DS;
-        }
-        else return NULL;
+        DS->Init(n);
+        return (void*)DS;
     }
     catch(std::bad_alloc &ba) {
         return NULL;

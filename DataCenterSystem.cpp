@@ -21,10 +21,7 @@ DataCenterSystem::~DataCenterSystem() {
     delete (this->serversHashMap);
     this->serversHashMap = NULL;
 }
-StatusType DataCenterSystem::Init(int n) {
-    if (n <= 0) {
-        return FAILURE;
-    }
+void DataCenterSystem::Init(int n) {
     try {
         this->dataCentersArray =  new DataCenter*[n];
         for (int i = 1; i <= n ; i++) {
@@ -35,14 +32,12 @@ StatusType DataCenterSystem::Init(int n) {
         this->dataCenterUnionFindByID = new UnionFind(n);
         this->serversHashMap = new HashMap<Server*>();
         this->elementsNum = n;
-        return SUCCESS;
     }
     catch(std::bad_alloc &ba){
         this->dataCentersArray = NULL;
         this->allServersTraffic = NULL;
         this->dataCenterUnionFindByID = NULL;
         this->serversHashMap = NULL;
-        return FAILURE;
     }
 }
 
@@ -59,6 +54,40 @@ StatusType DataCenterSystem:: MergeDataCenters(int dataCenter1,  int dataCenter2
         return INVALID_INPUT;
     }
     try {
+        int dataCenter1Set = this->dataCenterUnionFindByID->find(dataCenter1-1);
+        int dataCenter2Set = this->dataCenterUnionFindByID->find(dataCenter2-1);
+        DataCenter* toMerge1 = this->dataCentersArray[dataCenter1Set];
+        DataCenter* toMerge2 = this->dataCentersArray[dataCenter2Set];
+        RankTree<ServerNodeKey,int>* rankTree1 = toMerge1->DCsServersTraffic;
+        RankTree<ServerNodeKey,int>* rankTree2 = toMerge2->DCsServersTraffic;
+        int newTrafficCount = 0;
+        if (rankTree1 != NULL) {
+            newTrafficCount += rankTree1->getSize();
+        }
+        if (rankTree2 != NULL) {
+            newTrafficCount += rankTree2->getSize();
+        }
+        //getting merged servers tree:
+        if (newTrafficCount > 0) {
+            if (rankTree1 != NULL && rankTree2 != NULL) {
+                rankTree1 = rankTree1->merge(rankTree2, rankTree1->getSize(), rankTree2->getSize());
+            }
+            else if (rankTree2 != NULL && rankTree1 == NULL) {
+                rankTree1 = rankTree2;
+            }
+        }
+        int newServerCount = toMerge1->serversCounter + toMerge2->serversCounter;
+        //merge IDs in unionFind
+        int mergedID = this->dataCenterUnionFindByID->unionFunc(dataCenter1Set, dataCenter2Set);
+        //updating info after union
+        this->dataCentersArray[mergedID]->DCsServersTraffic = rankTree1;
+        this->dataCentersArray[mergedID]->serversCounter = newServerCount;
+        if (mergedID != dataCenter1Set) {
+            this->dataCentersArray[dataCenter1-1] = this->dataCentersArray[mergedID];
+        } else if (mergedID != dataCenter2Set) {
+            this->dataCentersArray[dataCenter2-1] = this->dataCentersArray[mergedID];
+        }
+        return SUCCESS;
     }
     catch (std::bad_alloc &ba) {
         return ALLOCATION_ERROR;
@@ -73,10 +102,11 @@ StatusType DataCenterSystem::AddServer(int dataCenterID, int serverID) {
         return FAILURE;
     }
     try {
-        int currDCGroup = this->dataCenterUnionFindByID->find(dataCenterID);
-        Server *newServer = new Server(serverID,currDCGroup);
+        int currDCGroup = this->dataCenterUnionFindByID->find(dataCenterID-1);
+        Server *newServer = new Server(serverID,currDCGroup+1);
         this->serversHashMap->insert(serverID,newServer);
-        this->dataCentersArray[currDCGroup-1]->serversCounter++;
+        this->dataCentersArray[currDCGroup]->serversCounter++;
+        return SUCCESS;
     }
     catch (std::bad_alloc &ba) {
         return ALLOCATION_ERROR;
@@ -98,16 +128,13 @@ StatusType DataCenterSystem::RemoveServer(int serverID) {
         this->serversHashMap->deleteNode(serverID);
 
         if (trafficToRemove != -1) {
-            ServerNodeKey *toRemove = new ServerNodeKey(serverID);
-            toRemove->traffic = trafficToRemove;
+            ServerNodeKey toRemove = ServerNodeKey(serverID,trafficToRemove);
             this->allServersTraffic->deleteKey(toRemove);
 
             DCsServerToRemove->DCsServersTraffic->deleteKey(toRemove);
             DCsServerToRemove->serversCounter--;
-            
-            //CHECK: should delete or happens automatically?
-            //delete toRemove;
         }
+        return SUCCESS;
     }
     catch (std::bad_alloc &ba) {
         return ALLOCATION_ERROR;
@@ -120,9 +147,55 @@ StatusType DataCenterSystem::SetTraffic(int serverID, int traffic) {
     if (!(isServerExist(serverID)))
         return FAILURE;
     try {
+            Server* addTrafficServer = *(this->serversHashMap->find(serverID));
+            int oldTraffic = addTrafficServer->traffic;
+            addTrafficServer->traffic = traffic;
+            int fatherDCID = this->dataCenterUnionFindByID->find(addTrafficServer->DCFatherID);
+            DataCenter *fatherDC = this->dataCentersArray[fatherDCID-1];
 
-//        ServerNodeKey *newServerKey = new ServerNodeKey(serverID);
+            //check if there was no traffic for this server before, if so add new node in right place to both trees
+            //else remove old node and new one
+            if (traffic == -1) {
+                ServerNodeKey* newNode = new ServerNodeKey(serverID,traffic);
 
+                this->allServersTraffic->insert(*newNode,0);
+                int newData = this->allServersTraffic->findAVLNode(*newNode)->getLeftSonData();
+                newData += this->allServersTraffic->findAVLNode(*newNode)->getRightSonData();
+                newData += traffic;
+                this->allServersTraffic->changeData(*newNode,newData);
+
+                fatherDC->DCsServersTraffic->insert(*newNode,0);
+                int newDataDC = fatherDC->DCsServersTraffic->findAVLNode(*newNode)->getLeftSonData();
+                newDataDC += fatherDC->DCsServersTraffic->findAVLNode(*newNode)->getRightSonData();
+                newDataDC += traffic;
+                fatherDC->DCsServersTraffic->changeData(*newNode,newDataDC);
+
+                //TODO: how to update data all the way to the root?
+
+            } else {
+                ServerNodeKey oldNode = ServerNodeKey(serverID,oldTraffic);
+                this->allServersTraffic->deleteKey(oldNode);
+                fatherDC->DCsServersTraffic->deleteKey(oldNode);
+
+                //TODO: how to update data all the way to the root- for deletion?
+
+                ServerNodeKey* newNode = new ServerNodeKey(serverID,traffic);
+
+                this->allServersTraffic->insert(*newNode,0);
+                int newData = this->allServersTraffic->findAVLNode(*newNode)->getLeftSonData();
+                newData += this->allServersTraffic->findAVLNode(*newNode)->getRightSonData();
+                newData += traffic;
+                this->allServersTraffic->changeData(*newNode,newData);
+
+                fatherDC->DCsServersTraffic->insert(*newNode,0);
+                int newDataDC = fatherDC->DCsServersTraffic->findAVLNode(*newNode)->getLeftSonData();
+                newDataDC += fatherDC->DCsServersTraffic->findAVLNode(*newNode)->getRightSonData();
+                newDataDC += traffic;
+                fatherDC->DCsServersTraffic->changeData(*newNode,newDataDC);
+
+                //TODO: how to update data all the way to the root?
+            }
+            return SUCCESS;
     }
     catch (std::bad_alloc &ba) {
         return ALLOCATION_ERROR;
@@ -143,4 +216,3 @@ StatusType DataCenterSystem::SumHighestTrafficServers(int dataCenterID, int k, i
 bool DataCenterSystem::isServerExist(int serverID) {
     return this->serversHashMap->isExist(serverID);
 }
-

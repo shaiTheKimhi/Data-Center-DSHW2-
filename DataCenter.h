@@ -16,7 +16,7 @@ public:
     int serverID;
     int traffic;
 
-    ServerNodeKey(int serverID): serverID(serverID),traffic(-1){};
+    ServerNodeKey(int serverID, int traffic): serverID(serverID),traffic(traffic){};
 
     int getTraffic() {
         return this->traffic;

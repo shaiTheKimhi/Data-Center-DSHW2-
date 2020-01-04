@@ -16,7 +16,7 @@ public:
 
     DataCenterSystem();
     ~DataCenterSystem();
-    StatusType Init(int n);//initializes the dataCenterSystem
+    void Init(int n);//initializes the dataCenterSystem
 
     StatusType MergeDataCenters(int dataCenter1,  int dataCenter2);
 
