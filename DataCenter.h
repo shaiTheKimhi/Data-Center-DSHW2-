@@ -17,51 +17,52 @@ public:
     int traffic;
 
     ServerNodeKey(int serverID): serverID(serverID),traffic(-1){};
-    bool operator> (ServerNodeKey* toCompare) {
-        if (toCompare == NULL){
-            return true;
-        }
-        if (this->traffic > toCompare->traffic) {
-            return true;
-        }
 
-        if (this->traffic < toCompare->traffic)  {
-            return false;
-        }
-
-        if (this->traffic == toCompare->traffic) {
-            return (this->serverID > toCompare->serverID);
-        }
+    int getTraffic() {
+        return this->traffic;
     }
 
-    bool operator< (ServerNodeKey* toCompare) {
-        if (toCompare == NULL){
-            return false;
-        }
-        if (this->traffic < toCompare->traffic) {
+    int getID() {
+        return this->serverID;
+    }
+
+    bool operator< (ServerNodeKey toCmp) {
+        if (this->traffic < toCmp.traffic) {
             return true;
         }
 
-        if (this->traffic > toCompare->traffic)  {
+        if (this->traffic > toCmp.traffic) {
             return false;
         }
 
-        if (this->traffic == toCompare->traffic) {
-            return (this->serverID < toCompare->serverID);
+        if(this->traffic == toCmp.traffic){
+            return (this->serverID < toCmp.serverID);
         }
+        return false;
     }
 
-    bool operator== (ServerNodeKey* toCompare) {
-        if (toCompare == NULL){
+    bool operator> (ServerNodeKey toCmp) {
+        if (this->traffic > toCmp.traffic) {
+            return true;
+        }
+
+        if (this->traffic < toCmp.traffic) {
             return false;
         }
-        if (this->traffic == toCompare->traffic) {
-            return (this->serverID == toCompare->serverID);
+
+        if(this->traffic == toCmp.traffic){
+            return (this->serverID > toCmp.serverID);
         }
-        else {
-            return false;
-        }
+        return false;
     }
+
+    bool operator== (ServerNodeKey toCmp) {
+        if (this->traffic == toCmp.traffic) {
+            return (this->serverID == toCmp.serverID);
+        }
+        return false;
+    }
+
 };
 
 class DataCenter {
