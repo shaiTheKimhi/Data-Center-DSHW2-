@@ -242,18 +242,40 @@ public:
     //rotating left
     void rotateRR(AVLNode* node) {
         //update ranks of temp(parent) and node (right son):
-        int n, nl, nrl, nr, nrr;
-        if(!node->rightSon->leftSon) nrl = 0;
-        else nrl = node->rightSon->leftSon->rank;
-        if(!node->rightSon->rightSon) nrr = 0;
-        else nrr = node->rightSon->rightSon->rank;
-        if(!node->leftSon) nl = 0;
-        else nl = node->leftSon->rank;
+        int n, nl, nrl, nr, nrr,data_l,data_rl,data_r,data_rr,newData;
+        if(!node->rightSon->leftSon) {
+            nrl = 0;
+            data_rl = 0;
+        }
+        else {
+            nrl = node->rightSon->leftSon->rank;
+            data_rl = node->rightSon->leftSon->getData();
+        }
+        if(!node->rightSon->rightSon) {
+            nrr = 0;
+            data_rr = 0;
+        }
+        else {
+            nrr = node->rightSon->rightSon->rank;
+            data_rr = node->rightSon->rightSon->getData();
+        }
+        if(!node->leftSon){
+            nl = 0;
+            data_l = 0;
+        }
+        else {
+            nl = node->leftSon->rank;
+            data_l = node->leftSon->getData();
+        }
 
         n = 1 + nl + nrl;
+        newData = 1 + data_l + data_rl;
         nr = 1 + nrr + n;
+        data_r = 1 + data_rr + newData;
         node->rank = n;//1 + node->leftSon->rank + node->rightSon->leftSon->rank;
+        node->data = newData;
         node->rightSon->rank =nr; //1 + node->rightSon->rightSon->rank + node->rank;
+        node->rightSon->data = data_r;
 
         AVLNode* temp = node->rightSon;
         node->rightSon = temp->leftSon;
@@ -268,19 +290,41 @@ public:
     //rotating right
     void rotateLL(AVLNode* node) {
         //update ranks of temp(parent) and node (right son):
-        int n, nl, nlr, nr, nll;
-        if(!node->leftSon->rightSon) nlr = 0;
-        else nlr = node->leftSon->rightSon->rank;
-        if(!node->leftSon->leftSon) nll = 0;
-        else nll = node->leftSon->leftSon->rank;
-        if(!node->rightSon) nr = 0;
-        else nr = node->rightSon->rank;
+        int n, nl, nlr, nr, nll, newData, data_l,data_lr,data_r,data_ll;
+        if(!node->leftSon->rightSon) {
+            nlr = 0;
+            data_lr = 0;
+        }
+        else {
+            nlr = node->leftSon->rightSon->rank;
+            data_lr = node->leftSon->rightSon->getData();
+        }
+        if(!node->leftSon->leftSon) {
+            nll = 0;
+            data_ll = 0;
+        }
+        else {
+            nll = node->leftSon->leftSon->rank;
+            data_ll = node->leftSon->leftSon->getData();
+        }
+        if(!node->rightSon) {
+            nr = 0;
+            data_r = 0;
+        }
+        else {
+            nr = node->rightSon->rank;
+            data_r = node->rightSon->getData();
+        }
 
         n = 1 + nr + nlr;
+        newData = 1 + data_r + data_lr;
         nl = 1 + nll + n;
+        data_l = 1 + data_ll + newData;
 
         node->rank = n;//1 + node->rightSon->rank + node->leftSon->rightSon->rank;
+        node->data = newData;
         node->leftSon->rank = nl;//1 + node->leftSon->leftSon->rank + node->rank;
+        node->leftSon->data = data_l;
 
         AVLNode* temp = node->leftSon;
         node->leftSon = temp->rightSon;
@@ -307,7 +351,7 @@ public:
     }
 
     //getters
-    D getData(K key) const;
+    D getData(K key);
     int getSize() const {
         return size;
     }
@@ -573,7 +617,7 @@ bool RankTree<K, D>::isExist(K key) {
     return (current != NULL);
 }
 template<class K, class D>
-D RankTree<K, D>::getData(K key) const {
+D RankTree<K, D>::getData(K key) {
     AVLNode* nodeToGetData = findAVLNode(key);
     if (nodeToGetData) {
         return nodeToGetData->data;
