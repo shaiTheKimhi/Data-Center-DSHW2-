@@ -176,14 +176,10 @@ StatusType DataCenterSystem::SetTraffic(int serverID, int traffic) {
                 newDataDC += traffic;
                 fatherDC->DCsServersTraffic->changeData(*newNode,newDataDC);
 
-                //TODO: how to update data all the way to the root?
-
             } else {
                 ServerNodeKey oldNode = ServerNodeKey(serverID,oldTraffic);
                 this->allServersTraffic->deleteKey(oldNode);
                 fatherDC->DCsServersTraffic->deleteKey(oldNode);
-
-                //TODO: how to update data all the way to the root- for deletion?
 
                 ServerNodeKey* newNode = new ServerNodeKey(serverID,traffic);
 
@@ -198,8 +194,6 @@ StatusType DataCenterSystem::SetTraffic(int serverID, int traffic) {
                 newDataDC += fatherDC->DCsServersTraffic->findAVLNode(*newNode)->getRightSonData();
                 newDataDC += traffic;
                 fatherDC->DCsServersTraffic->changeData(*newNode,newDataDC);
-
-                //TODO: how to update data all the way to the root?
             }
             return SUCCESS;
     }
@@ -213,7 +207,20 @@ StatusType DataCenterSystem::SumHighestTrafficServers(int dataCenterID, int k, i
         return INVALID_INPUT;
     }
     try {
-
+        if (dataCenterID > 0) {
+            int fatherId = this->dataCenterUnionFindByID->find(dataCenterID);
+            DataCenter* DC = this->dataCentersArray[fatherId-1];
+            int serversWithTrafficAmount = DC->DCsServersTraffic->getSize();
+            int minIndex = (k > serversWithTrafficAmount) ? 0 : (serversWithTrafficAmount-k+1);
+            *traffic = DC->DCsServersTraffic->getDataByMinIndex(minIndex);
+            return SUCCESS;
+        }
+        else {
+            int serversWithTrafficAmount = this->allServersTraffic->getSize();
+            int minIndex = (k > serversWithTrafficAmount) ? 0 : (serversWithTrafficAmount-k+1);
+            *traffic = this->allServersTraffic->getDataByMinIndex(minIndex);
+            return SUCCESS;
+        }
     }
     catch (std::bad_alloc &ba) {
         return ALLOCATION_ERROR;

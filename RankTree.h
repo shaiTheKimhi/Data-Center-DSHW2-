@@ -157,6 +157,7 @@ class RankTree {
     void insert(K key, D data, AVLNode* parent);
     void deleteNode(AVLNode* toDelete);
     void reduceRankPath(K key);
+    void reduceDataPath(K key);
     void changeNode(AVLNode* parent, AVLNode* oldNode, AVLNode* newNode);
     void reBalance(AVLNode* node, bool isDelete = false);
     //void pourToArray(AVLNode* node, int** arr, int m);
@@ -599,9 +600,27 @@ bool RankTree<K, D>::deleteKey(K key) {
     AVLNode* current = findAVLNode(key);
     if (!current) return false;
     reduceRankPath(key);
+    reduceDataPath(key);
     deleteNode(current);
     size--;
     return true;
+}
+
+template<class K, class D>
+void RankTree<K,D>::reduceDataPath(K key) {
+    AVLNode* current = root;
+    while (current) {
+        current->data -= key();
+        if (current->key == key){
+            //current->data  = 0;
+            return;
+        }
+        if (current->key > key) {
+            current = current->leftSon;
+        } else {
+            current = current->rightSon;
+        }
+    }
 }
 template<class K, class D>
 void RankTree<K, D>::deleteNode(AVLNode* toDelete) {
@@ -615,7 +634,7 @@ void RankTree<K, D>::deleteNode(AVLNode* toDelete) {
     }
     if (ancestor) {
         toDelete->key = ancestor->key;
-        toDelete->data = ancestor->data;
+        toDelete->data = ancestor->data + toDelete->data - ancestor->key();
         deleteNode(ancestor);
     } else { // node is a leaf or remained a leaf
         AVLNode* parent = toDelete->parent;
@@ -623,9 +642,11 @@ void RankTree<K, D>::deleteNode(AVLNode* toDelete) {
             root = NULL;
         }
         else if (parent->leftSon == toDelete) {
+            parent->data -= toDelete->key();
             parent->leftSon = NULL;
         }
         else {
+            //parent->data -= toDelete->key();
             parent->rightSon = NULL;
         }
         delete(toDelete);
@@ -649,7 +670,7 @@ D RankTree<K, D>::getData(K key) {
     AVLNode* nodeToGetData = findAVLNode(key);
     if (nodeToGetData) {
         return nodeToGetData->data;
-    } else return NULL;
+    } else return -1;
 }
 template<class K, class D>
 void RankTree<K, D>::changeData(K key, D new_data){
