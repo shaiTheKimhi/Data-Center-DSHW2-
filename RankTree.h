@@ -217,6 +217,34 @@ public:
     int getRank(K);
     RankTree* merge(RankTree* other, int m1, int m2);
 
+    int getDataByMinIndex(int minIndex) {
+        int  firstInRange = false;
+        int dataCounter = 0;
+        AVLNode* current = root;
+        while (current) {
+            if (findNodeIndex(current->key) == minIndex) {
+                if (!firstInRange) {
+                    dataCounter += current->getData();
+                }
+                if (current -> leftSon) {
+                    dataCounter -= current->leftSon->getData();
+                }
+                return dataCounter;
+            }
+            if (findNodeIndex(current->key) > minIndex) {
+                if (firstInRange == false) {
+                    firstInRange = true;
+                    dataCounter += current->getData();
+                }
+                current = current->leftSon;
+            } else {
+                current = current->rightSon;
+            }
+        }
+        return dataCounter;
+
+    }
+
     AVLNode* getRoot()
     {
         return this->root;
