@@ -223,7 +223,7 @@ public:
         int dataCounter = 0;
         AVLNode* current = root;
         while (current) {
-            if (findNodeIndex(current->key) == minIndex) {
+            if ((findNodeIndex(current->key) - 1) == minIndex) {
                 if (!firstInRange) {
                     dataCounter += current->getData();
                 }

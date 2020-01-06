@@ -160,7 +160,7 @@ StatusType DataCenterSystem::SetTraffic(int serverID, int traffic) {
                 if (this->allServersTraffic == NULL) {
                     this->allServersTraffic = new RankTree<ServerNodeKey,int>();
                 }
-                this->allServersTraffic->insert(*newNode,0);
+                this->allServersTraffic->insert(*newNode,traffic);
                 int newData = this->allServersTraffic->findAVLNode(*newNode)->isLeftSonExist() ? this->allServersTraffic->findAVLNode(*newNode)->getLeftSonData() : 0;
                 newData += this->allServersTraffic->findAVLNode(*newNode)->isRightSonExist() ? this->allServersTraffic->findAVLNode(*newNode)->getRightSonData(): 0;
                 newData += traffic;
@@ -170,7 +170,7 @@ StatusType DataCenterSystem::SetTraffic(int serverID, int traffic) {
                     fatherDC->DCsServersTraffic = new RankTree<ServerNodeKey,int>();
                 }
 
-                fatherDC->DCsServersTraffic->insert(*newNode,0);
+                fatherDC->DCsServersTraffic->insert(*newNode,traffic);
                 int newDataDC = fatherDC->DCsServersTraffic->findAVLNode(*newNode)->isLeftSonExist() ? fatherDC->DCsServersTraffic->findAVLNode(*newNode)->getLeftSonData(): 0;
                 newDataDC += fatherDC->DCsServersTraffic->findAVLNode(*newNode)->isRightSonExist() ? fatherDC->DCsServersTraffic->findAVLNode(*newNode)->getRightSonData(): 0;
                 newDataDC += traffic;
@@ -183,13 +183,13 @@ StatusType DataCenterSystem::SetTraffic(int serverID, int traffic) {
 
                 ServerNodeKey* newNode = new ServerNodeKey(serverID,traffic);
 
-                this->allServersTraffic->insert(*newNode,0);
+                this->allServersTraffic->insert(*newNode,traffic);
                 int newData = this->allServersTraffic->findAVLNode(*newNode)->getLeftSonData();
                 newData += this->allServersTraffic->findAVLNode(*newNode)->getRightSonData();
                 newData += traffic;
                 this->allServersTraffic->changeData(*newNode,newData);
 
-                fatherDC->DCsServersTraffic->insert(*newNode,0);
+                fatherDC->DCsServersTraffic->insert(*newNode,traffic);
                 int newDataDC = fatherDC->DCsServersTraffic->findAVLNode(*newNode)->getLeftSonData();
                 newDataDC += fatherDC->DCsServersTraffic->findAVLNode(*newNode)->getRightSonData();
                 newDataDC += traffic;
@@ -211,7 +211,7 @@ StatusType DataCenterSystem::SumHighestTrafficServers(int dataCenterID, int k, i
             int fatherId = this->dataCenterUnionFindByID->find(dataCenterID);
             DataCenter* DC = this->dataCentersArray[fatherId-1];
             int serversWithTrafficAmount = DC->DCsServersTraffic->getSize();
-            int minIndex = (k > serversWithTrafficAmount) ? 0 : (serversWithTrafficAmount-k+1);
+            int minIndex = (k > serversWithTrafficAmount) ? 0 : (serversWithTrafficAmount-k);
             *traffic = DC->DCsServersTraffic->getDataByMinIndex(minIndex);
             return SUCCESS;
         }
