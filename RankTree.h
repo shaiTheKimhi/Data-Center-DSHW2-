@@ -261,21 +261,21 @@ public:
         }
         if(!node->leftSon){
             nl = 0;
-            data_l = 0;
+            data_l = (node->key)();
         }
         else {
             nl = node->leftSon->rank;
-            data_l = node->leftSon->getData();
+            data_l = node->leftSon->getData() + (node->key)();
         }
 
         n = 1 + nl + nrl;
-        newData = 1 + data_l + data_rl;
+        newData = data_l +  data_rl;
         nr = 1 + nrr + n;
-        data_r = 1 + data_rr + newData;
+        data_r =  data_rr + data_l + data_rl;
         node->rank = n;//1 + node->leftSon->rank + node->rightSon->leftSon->rank;
         node->data = newData;
-        node->rightSon->rank =nr; //1 + node->rightSon->rightSon->rank + node->rank;
-        node->rightSon->data = data_r;
+        node->rightSon->rank = nr; //1 + node->rightSon->rightSon->rank + node->rank;
+        node->rightSon->data = data_r + (node->rightSon->key)();
 
         AVLNode* temp = node->rightSon;
         node->rightSon = temp->leftSon;
@@ -309,22 +309,22 @@ public:
         }
         if(!node->rightSon) {
             nr = 0;
-            data_r = 0;
+            data_r = (node->key)();
         }
         else {
             nr = node->rightSon->rank;
-            data_r = node->rightSon->getData();
+            data_r = node->rightSon->getData() + (node->key)();
         }
 
         n = 1 + nr + nlr;
-        newData = 1 + data_r + data_lr;
+        newData = data_r + data_lr;
         nl = 1 + nll + n;
-        data_l = 1 + data_ll + newData;
+        data_l = data_ll + data_r + data_lr;
 
         node->rank = n;//1 + node->rightSon->rank + node->leftSon->rightSon->rank;
         node->data = newData;
         node->leftSon->rank = nl;//1 + node->leftSon->leftSon->rank + node->rank;
-        node->leftSon->data = data_l;
+        node->leftSon->data = data_l + (node->leftSon->key)();
 
         AVLNode* temp = node->leftSon;
         node->leftSon = temp->rightSon;

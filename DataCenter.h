@@ -63,6 +63,10 @@ public:
         return false;
     }
 
+    int operator() () {
+        return this->traffic;
+    }
+
 };
 
 class DataCenter {

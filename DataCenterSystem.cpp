@@ -213,6 +213,7 @@ StatusType DataCenterSystem::SumHighestTrafficServers(int dataCenterID, int k, i
         return INVALID_INPUT;
     }
     try {
+
     }
     catch (std::bad_alloc &ba) {
         return ALLOCATION_ERROR;
