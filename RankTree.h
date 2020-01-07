@@ -220,6 +220,11 @@ public:
                 }
                 current = current->leftSon;
             } else {
+                if (firstInRange == true) {
+                    if (current->rightSon) {
+                        dataCounter -= current->getData() - current->rightSon->key();
+                    }
+                }
                 current = current->rightSon;
             }
         }
@@ -496,10 +501,12 @@ public:
         if (current->leftSon) {
             updateData(current->leftSon);
             current->data += current->leftSon->getData();
+            current->leftSon->parent = current;
         }
         if (current->rightSon) {
             updateData(current->rightSon);
             current->data += current->rightSon->getData();
+            current->rightSon->parent = current;
         }
         else if (!current->rightSon && !current->leftSon) {
             current->data = current->key();

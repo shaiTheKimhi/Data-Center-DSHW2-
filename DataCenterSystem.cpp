@@ -208,8 +208,8 @@ StatusType DataCenterSystem::SumHighestTrafficServers(int dataCenterID, int k, i
     }
     try {
         if (dataCenterID > 0) {
-            int fatherId = this->dataCenterUnionFindByID->find(dataCenterID);
-            DataCenter* DC = this->dataCentersArray[fatherId-1];
+            int fatherId = this->dataCenterUnionFindByID->find(dataCenterID-1);
+            DataCenter* DC = this->dataCentersArray[fatherId];
             int serversWithTrafficAmount = DC->DCsServersTraffic->getSize();
             int minIndex = (k > serversWithTrafficAmount) ? 0 : (serversWithTrafficAmount-k);
             *traffic = DC->DCsServersTraffic->getDataByMinIndex(minIndex);
