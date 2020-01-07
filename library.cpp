@@ -43,7 +43,7 @@ StatusType SetTraffic(void *DS, int serverID, int traffic) {
     if (DS == NULL) {
         return INVALID_INPUT;
     }
-    return ((DataCenterSystem *)DS)->SetTraffic(serverID,serverID);
+    return ((DataCenterSystem *)DS)->SetTraffic(serverID,traffic);
 }
 
 StatusType SumHighestTrafficServers(void *DS, int dataCenterID, int k, int* traffic) {

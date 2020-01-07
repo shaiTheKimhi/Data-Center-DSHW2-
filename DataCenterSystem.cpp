@@ -114,7 +114,7 @@ StatusType DataCenterSystem::AddServer(int dataCenterID, int serverID) {
 }
 
 StatusType DataCenterSystem::RemoveServer(int serverID) {
-    if (serverID < 0) {
+    if (serverID <= 0) {
         return INVALID_INPUT;
     }
     if (!(isServerExist(serverID))) {
@@ -142,7 +142,7 @@ StatusType DataCenterSystem::RemoveServer(int serverID) {
 }
 
 StatusType DataCenterSystem::SetTraffic(int serverID, int traffic) {
-    if (traffic < 0 || serverID < 0)
+    if (traffic < 0 || serverID <= 0)
         return INVALID_INPUT;
     if (!(isServerExist(serverID)))
         return FAILURE;
@@ -184,14 +184,14 @@ StatusType DataCenterSystem::SetTraffic(int serverID, int traffic) {
                 ServerNodeKey* newNode = new ServerNodeKey(serverID,traffic);
 
                 this->allServersTraffic->insert(*newNode,traffic);
-                int newData = this->allServersTraffic->findAVLNode(*newNode)->getLeftSonData();
-                newData += this->allServersTraffic->findAVLNode(*newNode)->getRightSonData();
+                int newData = this->allServersTraffic->findAVLNode(*newNode)->isLeftSonExist() ? this->allServersTraffic->findAVLNode(*newNode)->getLeftSonData() : 0;
+                newData += this->allServersTraffic->findAVLNode(*newNode)->isRightSonExist() ? this->allServersTraffic->findAVLNode(*newNode)->getRightSonData() : 0;
                 newData += traffic;
                 this->allServersTraffic->changeData(*newNode,newData);
 
                 fatherDC->DCsServersTraffic->insert(*newNode,traffic);
-                int newDataDC = fatherDC->DCsServersTraffic->findAVLNode(*newNode)->getLeftSonData();
-                newDataDC += fatherDC->DCsServersTraffic->findAVLNode(*newNode)->getRightSonData();
+                int newDataDC = fatherDC->DCsServersTraffic->findAVLNode(*newNode)->isLeftSonExist() ?fatherDC->DCsServersTraffic->findAVLNode(*newNode)->getLeftSonData(): 0;
+                newDataDC += fatherDC->DCsServersTraffic->findAVLNode(*newNode)->isRightSonExist()? fatherDC->DCsServersTraffic->findAVLNode(*newNode)->getRightSonData(): 0;
                 newDataDC += traffic;
                 fatherDC->DCsServersTraffic->changeData(*newNode,newDataDC);
             }
