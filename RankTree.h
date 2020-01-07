@@ -81,8 +81,8 @@ class RankTree {
                 if (arr1[i1]->key < arr2[i2]->key) arr[i++] = arr1[i1++];
                 else arr[i++] = arr2[i2++];
             }
-            for (i1; i1 < m1; i1++) arr[i++] = arr1[i1];
-            for (i2; i2 < m2; i2++) arr[i++] = arr2[i2];
+            for (; i1 < m1; i1++) arr[i++] = arr1[i1];
+            for (; i2 < m2; i2++) arr[i++] = arr2[i2];
             return arr;
         }
         static AVLNode* createShell(int m, K key, D data)
