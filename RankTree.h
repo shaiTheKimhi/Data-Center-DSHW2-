@@ -96,22 +96,30 @@ class RankTree {
             AVLNode* node = new AVLNode(key, data);
             node->rank = m;
             m -= 1;
-            if (m % 2 != 0) node->leftSon = createShell(m / 2 + 1, key, data);
-            else node->leftSon = createShell(m / 2, key, data);
+            if (m % 2 != 0) {
+                node->leftSon = createShell(m / 2 + 1, key, data);
+            }
+            else {
+                node->leftSon = createShell(m / 2, key, data);
+            }
             node->rightSon = createShell(m / 2, key, data);
             return node;
         }
         void pourNode(AVLNode** arr, int m, int* i)
         {
             if ((*i) >= m) return;
-            if(this->leftSon)
+            if(this->leftSon) {
                 this->leftSon->pourNode(arr, m, i);
+            }
             this->key = arr[(*i)]->key;
-            this->data = arr[(*i)]->data;
+            this->data = (arr[(*i)]->key)();
+            //this->data = arr[(*i)]->data;
+
             //this->rank = m;
             (*i) += 1;
-            if(this->rightSon)
+            if(this->rightSon) {
                 this->rightSon->pourNode(arr, m, i);
+            }
         }
         AVLNode* mergeNodes(AVLNode* other, int m1, int m2)
         {
@@ -171,33 +179,6 @@ class RankTree {
 public:
     RankTree() : root(NULL), size(0) {}
     RankTree(AVLNode* node, int m) :root(node), size(m) {}
-    /*AVLNode* createShell(int m, AVLNode* parent = NULL)
-    {
-        if(!m) return NULL;
-        AVLNode* node = new AVLNode(0,0,parent);
-        node->leftSon = createShell(m/2, node);
-        node->rightSon = createShell(m/2, node);
-        return node;
-    }
-    void pour(int** arr, AVLNode* node, int m, int* i)
-    {
-        pour(arr, node->left, m, i);
-        if(!node) return;
-        if(i >= m) return;
-        node->key = arr[i][0];
-        node->data = arr[i][1];
-        *(i) += 1;
-        pour(arr, node->right, m, i);
-
-    }
-    RankTree(int** arr, int m):root(NULL),size(m)
-    {
-        int i = 0;
-        AVLNode* node = createShell(m);
-        pour(arr, node, m, &i);
-        root = node;
-        //check if anything needs to be added
-    }*/
     ~RankTree() {
         if (root != NULL) {
             delete root;
@@ -511,8 +492,19 @@ public:
         return indexCounter;
     }
 
-
-
+    void updateData(AVLNode* current) {
+        if (current->leftSon) {
+            updateData(current->leftSon);
+            current->data += current->leftSon->getData();
+        }
+        if (current->rightSon) {
+            updateData(current->rightSon);
+            current->data += current->rightSon->getData();
+        }
+        else if (!current->rightSon && !current->leftSon) {
+            current->data = current->key();
+        }
+    }
 };
 template<class K, class D>
 int RankTree<K, D>::getRank(AVLNode* node)
@@ -707,51 +699,13 @@ bool RankTree<K, D>::isEmpty()
     return this->root == NULL;
 }
 
-
-
-// template<class K, class D>
-// AVLNode* createShell(int n,K key, D data, AVLNode* parent)
-// {
-//     if(n <= 0) return NULL;
-//     AVLNode* node = AVLNode* node = new AVLNode(key,data, parent);
-//     node->leftSon = createShell(n - 1,key,data,node);
-//     node->rightSon = createShell(n - 2,key,data,node);
-// }
-
-// template<class K, class D>
-// AVLNode* createShell(int n,K key, D data)
-// {
-//     if(n <= 0) return NULL;
-//     AVLNode* node = new AVLNode(key,data);
-//     node->leftSon = createShell(n - 1,key,data,node);
-//     node->rightSon = createShell(n - 2,key,data,node);
-//     return node;
-// }
-
-// template<class K, class D>
-// RankTree<K, D>* RankTree<K,D>::merge(RankTree<K,D> t1, RankTree<K,D> t2, int m1, int m2)
-// {
-//     if(!m1 && (!m2)) NULL;
-//     AVLNode* shell = createShell(m1+m2, t.root->key,t.root->data);
-
-// }
-
-
-
-
-
-
-// void pourToArray(RankTree<int,int>::AVLNode* node, int** arr, int m)
-// {
-
-// }
-
 template<class K, class D>
 RankTree<K, D>* RankTree<K,D>::merge(RankTree<K,D>* other, int m1, int m2)
 {
     AVLNode* n1 = this->root;
     AVLNode* n2 = other->root;
     AVLNode* node = n1->mergeNodes(n2, m1, m2);
+    updateData(node);
     return new RankTree<K, D>(node, m1 + m2);
     /*int** arr = mergeArray(treeToArray(t1, m1), treeToArray(t2, m2), m1, m2);*/
 }

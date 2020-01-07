@@ -217,7 +217,7 @@ StatusType DataCenterSystem::SumHighestTrafficServers(int dataCenterID, int k, i
         }
         else {
             int serversWithTrafficAmount = this->allServersTraffic->getSize();
-            int minIndex = (k > serversWithTrafficAmount) ? 0 : (serversWithTrafficAmount-k+1);
+            int minIndex = (k > serversWithTrafficAmount) ? 0 : (serversWithTrafficAmount-k);
             *traffic = this->allServersTraffic->getDataByMinIndex(minIndex);
             return SUCCESS;
         }
