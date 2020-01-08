@@ -14,14 +14,24 @@ DataCenterSystem::DataCenterSystem() {
 }
 
 DataCenterSystem::~DataCenterSystem() {
-    delete[] (this->dataCentersArray);
-    this->dataCentersArray = NULL;
-    delete(this->allServersTraffic);
-    this->allServersTraffic = NULL;
-    delete (this->dataCenterUnionFindByID);
-    this->dataCenterUnionFindByID = NULL;
-    delete (this->serversHashMap);
-    this->serversHashMap = NULL;
+    if (this->dataCentersArray) {
+        for (int i = 0; i < this->elementsNum; i++)
+                delete this->dataCentersArray[i];
+        delete[](this->dataCentersArray);
+        this->dataCentersArray = NULL;
+    }
+    if (this->allServersTraffic) {
+        delete(this->allServersTraffic);
+        this->allServersTraffic = NULL;
+    }
+    if (this->dataCenterUnionFindByID) {
+        delete (this->dataCenterUnionFindByID);
+        this->dataCenterUnionFindByID = NULL;
+    }
+    if (this->serversHashMap) {
+        delete (this->serversHashMap);
+        this->serversHashMap = NULL;
+    }
 }
 void DataCenterSystem::Init(int n) {
     try {
@@ -60,6 +70,7 @@ StatusType DataCenterSystem:: MergeDataCenters(int dataCenter1,  int dataCenter2
         int dataCenter2Set = this->dataCenterUnionFindByID->find(dataCenter2-1);
         DataCenter* toMerge1 = this->dataCentersArray[dataCenter1Set];
         DataCenter* toMerge2 = this->dataCentersArray[dataCenter2Set];
+        
         RankTree<ServerNodeKey,int>* rankTree1 = toMerge1->DCsServersTraffic;
         RankTree<ServerNodeKey,int>* rankTree2 = toMerge2->DCsServersTraffic;
         int newTrafficCount = 0;
@@ -88,9 +99,9 @@ StatusType DataCenterSystem:: MergeDataCenters(int dataCenter1,  int dataCenter2
         this->dataCentersArray[mergedID]->DCsServersTraffic = rankTree1;
         this->dataCentersArray[mergedID]->serversCounter = newServerCount;
         if (mergedID != dataCenter1Set) {
-            this->dataCentersArray[dataCenter1-1] = this->dataCentersArray[mergedID];
+            this->dataCentersArray[dataCenter1Set] = NULL;
         } else if (mergedID != dataCenter2Set) {
-            this->dataCentersArray[dataCenter2-1] = this->dataCentersArray[mergedID];
+            this->dataCentersArray[dataCenter2Set] = NULL;
         }
         return SUCCESS;
     }
