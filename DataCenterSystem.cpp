@@ -12,7 +12,7 @@ DataCenterSystem::DataCenterSystem() {
 }
 
 DataCenterSystem::~DataCenterSystem() {
-    delete (this->dataCentersArray);
+    delete[] (this->dataCentersArray);
     this->dataCentersArray = NULL;
     delete(this->allServersTraffic);
     this->allServersTraffic = NULL;
