@@ -1,17 +1,18 @@
 #include <exception>
+#include <memory>
 #include"DataCenter.h"
 #include "HashMap.h"
 #include "UnionFind.h"
 
 using std::exception;
-
+using std::shared_ptr;
 class DataCenterSystem{
 public:
 
     DataCenter** dataCentersArray;
     RankTree<ServerNodeKey,int>* allServersTraffic;
     UnionFind* dataCenterUnionFindByID;
-    HashMap<Server*>* serversHashMap;
+    HashMap<shared_ptr<Server>>* serversHashMap;
     int elementsNum;
 
     DataCenterSystem();

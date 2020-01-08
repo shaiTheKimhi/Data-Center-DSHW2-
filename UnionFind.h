@@ -25,11 +25,11 @@ public:
         }
     }
     ~UnionFind() {
-        delete(this->setSize);
+        delete[](this->setSize);
         this->setSize = nullptr;
-        delete(this->parents);
+        delete[](this->parents);
         this->parents = nullptr;
-        delete(this->sets);
+        delete[](this->sets);
         this->sets = nullptr;
     }
 
