@@ -85,9 +85,11 @@ StatusType DataCenterSystem:: MergeDataCenters(int dataCenter1,  int dataCenter2
             if (rankTree1 != NULL && rankTree2 != NULL) {
                 RankTree<ServerNodeKey,int>* temp = rankTree1->merge(rankTree2, rankTree1->getSize(), rankTree2->getSize());
                 delete rankTree1;
-		delete rankTree2;
-		rankTree1 = temp;
-	    }
+		        delete rankTree2;
+                this->dataCentersArray[dataCenter1Set]->DCsServersTraffic = NULL;
+                this->dataCentersArray[dataCenter2Set]->DCsServersTraffic = NULL;
+		        rankTree1 = temp;
+	        }
             else if (rankTree2 != NULL && rankTree1 == NULL) {
                 rankTree1 = rankTree2;
             }
@@ -99,8 +101,10 @@ StatusType DataCenterSystem:: MergeDataCenters(int dataCenter1,  int dataCenter2
         this->dataCentersArray[mergedID]->DCsServersTraffic = rankTree1;
         this->dataCentersArray[mergedID]->serversCounter = newServerCount;
         if (mergedID != dataCenter1Set) {
+            delete this->dataCentersArray[dataCenter1Set];
             this->dataCentersArray[dataCenter1Set] = NULL;
         } else if (mergedID != dataCenter2Set) {
+            delete this->dataCentersArray[dataCenter2Set];
             this->dataCentersArray[dataCenter2Set] = NULL;
         }
         return SUCCESS;

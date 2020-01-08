@@ -135,7 +135,11 @@ class RankTree {
             node->pourNode(arr, m1 + m2, &i);
             delete[] arr1;
             delete[] arr2;
-            for(; i < m1 + m2; i++) delete arr[i];
+            /*for (; i < m1 + m2; i++)
+            {
+                if(arr[i] != this)
+                delete arr[i];
+            }*/
             delete[] arr;
             return node;
         }
@@ -187,7 +191,7 @@ public:
         }
     }
     bool isEmpty();
-
+    
     void insert(K key, D data);
     bool deleteKey(K key);
     bool isExist(K key) const;
@@ -200,6 +204,8 @@ public:
     int getRank(AVLNode*);
     int getRank(K);
     RankTree* merge(RankTree* other, int m1, int m2);
+
+    //void zeroRoot() { this->root = NULL; }
 
     int getDataByMinIndex(int minIndex) {
         int  firstInRange = false;
@@ -714,6 +720,10 @@ RankTree<K, D>* RankTree<K,D>::merge(RankTree<K,D>* other, int m1, int m2)
     AVLNode* n1 = this->root;
     AVLNode* n2 = other->root;
     AVLNode* node = n1->mergeNodes(n2, m1, m2);
+    delete n1;
+    delete n2;
+    other->root = NULL;
+    this->root = NULL;
     updateData(node);
     return new RankTree<K, D>(node, m1 + m2);
     /*int** arr = mergeArray(treeToArray(t1, m1), treeToArray(t2, m2), m1, m2);*/
