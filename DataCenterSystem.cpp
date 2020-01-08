@@ -3,6 +3,8 @@
 #include <new>
 #include "DataCenterSystem.h"
 
+
+
 DataCenterSystem::DataCenterSystem() {
     this->dataCentersArray = NULL;
     this->allServersTraffic = NULL;
@@ -30,7 +32,7 @@ void DataCenterSystem::Init(int n) {
         }
         this->allServersTraffic = NULL;
         this->dataCenterUnionFindByID = new UnionFind(n);
-        this->serversHashMap = new HashMap<Server*>();
+        this->serversHashMap = new HashMap<shared_ptr<Server>>();
         this->elementsNum = n;
     }
     catch(std::bad_alloc &ba){
@@ -70,8 +72,11 @@ StatusType DataCenterSystem:: MergeDataCenters(int dataCenter1,  int dataCenter2
         //getting merged servers tree:
         if (newTrafficCount > 0) {
             if (rankTree1 != NULL && rankTree2 != NULL) {
-                rankTree1 = rankTree1->merge(rankTree2, rankTree1->getSize(), rankTree2->getSize());
-            }
+                RankTree<ServerNodeKey,int>* temp = rankTree1->merge(rankTree2, rankTree1->getSize(), rankTree2->getSize());
+                delete rankTree1;
+		delete rankTree2;
+		rankTree1 = temp;
+	    }
             else if (rankTree2 != NULL && rankTree1 == NULL) {
                 rankTree1 = rankTree2;
             }
@@ -104,7 +109,9 @@ StatusType DataCenterSystem::AddServer(int dataCenterID, int serverID) {
     try {
         int currDCGroup = this->dataCenterUnionFindByID->find(dataCenterID-1);
         Server *newServer = new Server(serverID,currDCGroup+1);
-        this->serversHashMap->insert(serverID,newServer);
+        shared_ptr<Server> ns(newServer);
+        this->serversHashMap->insert(serverID,ns);
+        //delete newServer;
         this->dataCentersArray[currDCGroup]->serversCounter++;
         return SUCCESS;
     }
@@ -121,7 +128,7 @@ StatusType DataCenterSystem::RemoveServer(int serverID) {
         return FAILURE;
     }
     try {
-        Server* serverToRemove = *(this->serversHashMap->find(serverID));
+        shared_ptr<Server> serverToRemove = *(this->serversHashMap->find(serverID));
         int DCWithServerToRemoveID = this->dataCenterUnionFindByID->find((serverToRemove->DCFatherID)-1);
         DataCenter* DCsServerToRemove = this->dataCentersArray[DCWithServerToRemoveID];
         int trafficToRemove = serverToRemove->traffic;
@@ -147,7 +154,7 @@ StatusType DataCenterSystem::SetTraffic(int serverID, int traffic) {
     if (!(isServerExist(serverID)))
         return FAILURE;
     try {
-            Server* addTrafficServer = *(this->serversHashMap->find(serverID));
+            shared_ptr<Server> addTrafficServer = *(this->serversHashMap->find(serverID));
             int oldTraffic = addTrafficServer->traffic;
             addTrafficServer->traffic = traffic;
             int fatherDCID = this->dataCenterUnionFindByID->find((addTrafficServer->DCFatherID)-1);
@@ -175,7 +182,7 @@ StatusType DataCenterSystem::SetTraffic(int serverID, int traffic) {
                 newDataDC += fatherDC->DCsServersTraffic->findAVLNode(*newNode)->isRightSonExist() ? fatherDC->DCsServersTraffic->findAVLNode(*newNode)->getRightSonData(): 0;
                 newDataDC += traffic;
                 fatherDC->DCsServersTraffic->changeData(*newNode,newDataDC);
-
+                delete newNode;
             } else {
                 ServerNodeKey oldNode = ServerNodeKey(serverID,oldTraffic);
                 this->allServersTraffic->deleteKey(oldNode);
@@ -194,6 +201,7 @@ StatusType DataCenterSystem::SetTraffic(int serverID, int traffic) {
                 newDataDC += fatherDC->DCsServersTraffic->findAVLNode(*newNode)->isRightSonExist()? fatherDC->DCsServersTraffic->findAVLNode(*newNode)->getRightSonData(): 0;
                 newDataDC += traffic;
                 fatherDC->DCsServersTraffic->changeData(*newNode,newDataDC);
+                delete newNode;
             }
             return SUCCESS;
     }
